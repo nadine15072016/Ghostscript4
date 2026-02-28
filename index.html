@@ -905,7 +905,7 @@ tfoot td {
 <body>
         <script>
         function goHomeMenuShortcut() {
-            localStorage.setItem('menuShortcutLoggedIn', 'true');
+            localStorage.setItem('semumu_menuShortcutLoggedIn', 'true');
             window.location.href = 'https://nadine15072016.github.io/Ghostscript1/';
         }
         </script>
@@ -924,7 +924,7 @@ tfoot td {
             </div>
             <h1 style="margin-bottom:8px;">
                                 <img src="https://img.icons8.com/fluency/96/cactus.png" alt="Cactus Icon Modern" class="cactus-animated" style="vertical-align:middle;width:64px;height:64px;"> 
-                                <span style="font-size:40px; vertical-align:middle; font-weight:800; letter-spacing:0.5px;">SiPrO (LTT) Desa Semumu</span>
+                                <span style="font-size:40px; vertical-align:middle; font-weight:800; letter-spacing:0.5px;">Sipro (LTT) Semumu</span>
             </h1>
             <p style="font-size:15px;font-weight:600;margin-bottom:2px;">Sistem Prediksi Otomatis - Luas Tambah Tanam</p>
             <div class="siklus" style="margin-bottom:10px;">Siklus: Panen → Bera (24 hari) → Olah Tanah (1 hari) → Tanam (1 hari) → Panen (115 hari)</div>
@@ -1275,9 +1275,8 @@ tfoot td {
                                             if (typeof data !== 'object' || Array.isArray(data)) throw new Error('Format backup tidak valid');
                                             if (!data.padiSawahData || !data.padiSawahTargets) throw new Error('File backup tidak valid.');
                                             if (confirm('Data lama akan diganti dengan data backup. Lanjutkan?')) {
-                                                // Simpan ke IndexedDB
-                                                saveToIndexedDB('padiSawahData', data.padiSawahData);
-                                                saveToIndexedDB('padiSawahTargets', data.padiSawahTargets);
+                                                localStorage.setItem('semumu_padiSawahData', data.padiSawahData);
+                                                localStorage.setItem('semumu_padiSawahTargets', data.padiSawahTargets);
                                                 // Sinkronkan dataStore global
                                                 window.dataStore = JSON.parse(data.padiSawahData);
                                                 // Pastikan fungsi-fungsi ini dipanggil setelah dataStore diupdate
@@ -1292,90 +1291,6 @@ tfoot td {
                                         event.target.value = '';
                                     };
                                     reader.readAsText(file);
-                                }
-                                // Fungsi IndexedDB & Migrasi Otomatis
-                                <script>
-                                function openIndexedDB() {
-                                    return new Promise((resolve, reject) => {
-                                        const request = window.indexedDB.open('SemumuDB', 1);
-                                        request.onupgradeneeded = function(event) {
-                                            const db = event.target.result;
-                                            if (!db.objectStoreNames.contains('dataStore')) {
-                                                db.createObjectStore('dataStore');
-                                            }
-                                        };
-                                        request.onsuccess = function(event) {
-                                            resolve(event.target.result);
-                                        };
-                                        request.onerror = function(event) {
-                                            reject(event.target.error);
-                                        };
-                                    });
-                                }
-
-                                function saveToIndexedDB(key, value) {
-                                    openIndexedDB().then(db => {
-                                        const tx = db.transaction('dataStore', 'readwrite');
-                                        const store = tx.objectStore('dataStore');
-                                        store.put(value, key);
-                                        tx.oncomplete = function() {
-                                            // Data saved
-                                        };
-                                        tx.onerror = function(event) {
-                                            showToast('IndexedDB error: ' + event.target.error, 'error');
-                                        };
-                                    }).catch(err => {
-                                        showToast('IndexedDB gagal: ' + err, 'error');
-                                    });
-                                }
-
-                                // Migrasi otomatis dari localStorage ke IndexedDB
-                                function migrateLocalStorageToIndexedDB() {
-                                    const keys = ['padiSawahData', 'padiSawahTargets'];
-                                    keys.forEach(key => {
-                                        const value = localStorage.getItem(key);
-                                        if (value !== null) {
-                                            saveToIndexedDB(key, value);
-                                            // Jika ingin hapus data localStorage setelah migrasi, aktifkan baris berikut:
-                                            // localStorage.removeItem(key);
-                                        }
-                                    });
-                                }
-
-                                // Jalankan migrasi saat aplikasi dimuat
-                                window.addEventListener('DOMContentLoaded', migrateLocalStorageToIndexedDB);
-                                function openIndexedDB() {
-                                    return new Promise((resolve, reject) => {
-                                        const request = window.indexedDB.open('PadiSawahDB', 1);
-                                        request.onupgradeneeded = function(event) {
-                                            const db = event.target.result;
-                                            if (!db.objectStoreNames.contains('dataStore')) {
-                                                db.createObjectStore('dataStore');
-                                            }
-                                        };
-                                        request.onsuccess = function(event) {
-                                            resolve(event.target.result);
-                                        };
-                                        request.onerror = function(event) {
-                                            reject(event.target.error);
-                                        };
-                                    });
-                                }
-
-                                function saveToIndexedDB(key, value) {
-                                    openIndexedDB().then(db => {
-                                        const tx = db.transaction('dataStore', 'readwrite');
-                                        const store = tx.objectStore('dataStore');
-                                        store.put(value, key);
-                                        tx.oncomplete = function() {
-                                            // Data saved
-                                        };
-                                        tx.onerror = function(event) {
-                                            showToast('IndexedDB error: ' + event.target.error, 'error');
-                                        };
-                                    }).catch(err => {
-                                        showToast('IndexedDB gagal: ' + err, 'error');
-                                    });
                                 }
                                 </script>
                                 <button class="control-btn btn-ghost" onclick="document.getElementById('importInput').click()" title="Import Data" style="padding:8px 10px;">⬆️ <span style="font-size:13px;vertical-align:middle;">Import</span></button>
@@ -1433,7 +1348,7 @@ tfoot td {
                         // --- FITUR RIWAYAT PERUBAHAN DATA ---
 // --- RIWAYAT NOTIFIKASI MODULAR ---
 function getHistoryLog() {
-    return JSON.parse(localStorage.getItem('padiSawahHistory') || '[]');
+    return JSON.parse(localStorage.getItem('semumu_padiSawahHistory') || '[]');
 }
 function addHistoryLog(action, tanggal, before, after) {
     const log = getHistoryLog();
@@ -1444,7 +1359,7 @@ function addHistoryLog(action, tanggal, before, after) {
         sebelum: before,
         sesudah: after
     });
-    localStorage.setItem('padiSawahHistory', JSON.stringify(log));
+    localStorage.setItem('semumu_padiSawahHistory', JSON.stringify(log));
     updateNotifCount();
 }
 function showHistoryModal() {
@@ -1472,7 +1387,7 @@ function showHistoryModal() {
 
     function renderTabRiwayatData() {
         // Selalu ambil data terbaru dari localStorage
-        const log = JSON.parse(localStorage.getItem('padiSawahHistory') || '[]').slice().reverse();
+        const log = JSON.parse(localStorage.getItem('semumu_padiSawahHistory') || '[]').slice().reverse();
         const tabContent = document.getElementById('tabContentRiwayat');
         if (log.length === 0) {
             tabContent.innerHTML = '<div style="color:#888;text-align:center;padding:32px 0;">Belum ada riwayat perubahan.</div>';
@@ -1590,7 +1505,7 @@ function formatObj(obj) {
 }
 function clearHistoryLog() {
     if (confirm('Hapus seluruh riwayat notifikasi?')) {
-        localStorage.removeItem('padiSawahHistory');
+        localStorage.removeItem('semumu_padiSawahHistory');
         // Hapus juga notifikasi prediksi hari ini dari window.dataStore
         let today = new Date();
         today.setHours(0,0,0,0);
@@ -1720,7 +1635,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             timestamp: Date.now()
                         };
                     }
-                    localStorage.setItem('padiSawahData', JSON.stringify(window.dataStore));
+                    localStorage.setItem('semumu_padiSawahData', JSON.stringify(window.dataStore));
                     showToast(`Import selesai: ${imported} data baru, ${updated} diperbarui, ${skipped} dilewati.`, 'success');
                     populateFilters();
                     updateStats();
@@ -1866,15 +1781,13 @@ document.addEventListener('DOMContentLoaded', function(){
                 // Backup data ke file JSON
                 function backupData() {
                     const data = {
-                        padiSawahData: localStorage.getItem('padiSawahData') || '{}',
-                        padiSawahTargets: localStorage.getItem('padiSawahTargets') || '{}'
+                        padiSawahData: localStorage.getItem('semumu_padiSawahData') || '{}',
+                        padiSawahTargets: localStorage.getItem('semumu_padiSawahTargets') || '{}'
                     };
                     const now = new Date();
                     const pad = n => n.toString().padStart(2, '0');
-                        const desaName = document.getElementById('inputDesa')?.value?.trim() || 'Desa';
-                        const cleanDesa = desaName.replace(/[^a-zA-Z0-9-_]/g, '_');
-                        const dateStr = `${pad(now.getDate())}-${pad(now.getMonth()+1)}-${now.getFullYear()}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-                        const filename = `SiPro LTT_${cleanDesa}_${dateStr}.json`;
+                    const dateStr = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+                    const filename = `Sipro_LTT_Semumu_${dateStr}.json`;
                     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -1885,7 +1798,7 @@ document.addEventListener('DOMContentLoaded', function(){
                 }
         // Initialize
 
-        let dataStore = JSON.parse(localStorage.getItem('padiSawahData') || '{}');
+        let dataStore = JSON.parse(localStorage.getItem('semumu_padiSawahData') || '{}');
         window.dataStore = dataStore;
         // Proxy agar window.dataStore selalu sinkron
         function syncDataStore() {
@@ -1923,8 +1836,8 @@ document.addEventListener('DOMContentLoaded', function(){
             const todayStr = `${yyyy}-${mm}-${dd}`;
                 let dataStoreToday = {};
                 let notif = [];
-                if (localStorage.getItem('padiSawahData')) {
-                    dataStoreToday = JSON.parse(localStorage.getItem('padiSawahData'));
+                if (localStorage.getItem('semumu_padiSawahData')) {
+                    dataStoreToday = JSON.parse(localStorage.getItem('semumu_padiSawahData'));
                     if (dataStoreToday[todayStr]) {
                         notif.push('<b>Data untuk hari ini sudah ada!</b>');
                     } else {
@@ -2067,8 +1980,8 @@ document.addEventListener('DOMContentLoaded', function(){
                         try {
                             const json = JSON.parse(e.target.result);
                             if (json.padiSawahData && json.padiSawahTargets) {
-                                localStorage.setItem('padiSawahData', json.padiSawahData);
-                                localStorage.setItem('padiSawahTargets', json.padiSawahTargets);
+                                localStorage.setItem('semumu_padiSawahData', json.padiSawahData);
+                                localStorage.setItem('semumu_padiSawahTargets', json.padiSawahTargets);
                                 syncDataStore();
                                 showToast('Data berhasil direstore!', 'success');
                                 renderTable();
@@ -2098,7 +2011,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     waktu: Date.now()
                 });
             }
-            localStorage.setItem('padiSawahNotifLog', JSON.stringify(notifLog));
+            localStorage.setItem('semumu_padiSawahNotifLog', JSON.stringify(notifLog));
             // Notifikasi khusus jika tanggal hari ini
                 // Update dataStore dengan data input
                 dataStore[tanggal] = {
@@ -2114,7 +2027,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     timestamp: Date.now()
                 };
                 window.dataStore = dataStore;
-                localStorage.setItem('padiSawahData', JSON.stringify(dataStore));
+                localStorage.setItem('semumu_padiSawahData', JSON.stringify(dataStore));
             const today = new Date();
             const inputDate = new Date(tanggal);
             today.setHours(0,0,0,0);
@@ -2124,6 +2037,21 @@ document.addEventListener('DOMContentLoaded', function(){
             } else {
                 showToast('Data berhasil disimpan!', 'success');
             }
+            // Kirim data ke Google Sheets setelah simpan
+            // Siapkan data baris sesuai urutan kolom tabel
+            const rowData = [
+                tanggal,
+                luasPanen,
+                calculatePredictions(tanggal).luasPanen,
+                lahanBera,
+                calculatePredictions(tanggal).lahanBera,
+                lahanOlahTanah,
+                calculatePredictions(tanggal).lahanOlahTanah,
+                luasTambahTanam,
+                calculatePredictions(tanggal).luasTambahTanam,
+                gagalPanen ? 'Gagal Panen' : tundaTanam ? 'Tunda Tanam' : ''
+            ];
+            sendRowToGoogleSheets(rowData);
             resetForm();
             populateFilters();
             updateStats();
@@ -2156,7 +2084,7 @@ document.addEventListener('DOMContentLoaded', function(){
             if (confirm('Apakah Anda yakin ingin menghapus data tanggal ' + formatDate(tanggal) + '?')) {
                 const before = dataStore[tanggal] ? { ...dataStore[tanggal] } : null;
                 delete dataStore[tanggal];
-                localStorage.setItem('padiSawahData', JSON.stringify(dataStore));
+                localStorage.setItem('semumu_padiSawahData', JSON.stringify(dataStore));
                 addHistoryLog('Hapus', tanggal, before, null);
                 populateFilters();
                 renderTable();
@@ -2172,7 +2100,7 @@ document.addEventListener('DOMContentLoaded', function(){
                 if (confirm('Konfirmasi sekali lagi: Hapus semua data?')) {
                     dataStore = {};
                     window.dataStore = dataStore;
-                    localStorage.setItem('padiSawahData', JSON.stringify(dataStore));
+                    localStorage.setItem('semumu_padiSawahData', JSON.stringify(dataStore));
                     populateFilters();
                     renderTable();
                     updateStats();
@@ -2422,7 +2350,7 @@ document.addEventListener('DOMContentLoaded', function(){
                         let after = { ...dataStore[date] };
                         // Tambahkan ke riwayat notifikasi
                         addHistoryLog('Edit (Tabel)', date, before, after);
-                        localStorage.setItem('padiSawahData', JSON.stringify(dataStore));
+                        localStorage.setItem('semumu_padiSawahData', JSON.stringify(dataStore));
                         // Konfirmasi otomatis: tampilkan ikon sukses
                         this.classList.add('input-success');
                         setTimeout(()=>this.classList.remove('input-success'), 1200);
@@ -2431,7 +2359,20 @@ document.addEventListener('DOMContentLoaded', function(){
                         updateStats();
                         updateUndoRedoStatus();
                         // Kirim data baris ke Google Sheets
-                        sendRowToGoogleSheets(tr);
+                        // Ambil data baris dari input setelah perubahan inline edit
+                        const rowData = [
+                            date,
+                            dataStore[date].luasPanen,
+                            calculatePredictions(date).luasPanen,
+                            dataStore[date].lahanBera,
+                            calculatePredictions(date).lahanBera,
+                            dataStore[date].lahanOlahTanah,
+                            calculatePredictions(date).lahanOlahTanah,
+                            dataStore[date].luasTambahTanam,
+                            calculatePredictions(date).luasTambahTanam,
+                            dataStore[date].gagalPanen ? 'Gagal Panen' : dataStore[date].tundaTanam ? 'Tunda Tanam' : ''
+                        ];
+                        sendRowToGoogleSheets(rowData);
                     });
                     // Tambahkan style untuk konfirmasi otomatis dan error
                     const style = document.createElement('style');
@@ -2452,7 +2393,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     redoStack.push(JSON.stringify(dataStore));
                     dataStore = JSON.parse(undoStack.pop());
                     window.dataStore = dataStore;
-                    localStorage.setItem('padiSawahData', JSON.stringify(dataStore));
+                    localStorage.setItem('semumu_padiSawahData', JSON.stringify(dataStore));
                     renderTable();
                     updateStats();
                     showToast('Undo perubahan data.', 'success');
@@ -2463,7 +2404,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     undoStack.push(JSON.stringify(dataStore));
                     dataStore = JSON.parse(redoStack.pop());
                     window.dataStore = dataStore;
-                    localStorage.setItem('padiSawahData', JSON.stringify(dataStore));
+                    localStorage.setItem('semumu_padiSawahData', JSON.stringify(dataStore));
                     renderTable();
                     updateStats();
                     showToast('Redo perubahan data.', 'success');
@@ -2555,7 +2496,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             const desaInput = document.getElementById('inputDesa');
                             if (!monthTop || !yearTop || !kecamatanInput || !desaInput) return;
                             const key = `${yearTop.value}-${monthTop.value}`;
-                            const targets = JSON.parse(localStorage.getItem('padiSawahTargets') || '{}');
+                            const targets = JSON.parse(localStorage.getItem('semumu_padiSawahTargets') || '{}');
                             const t = targets[key] || {};
                             kecamatanInput.value = t.kecamatan || '';
                             desaInput.value = t.desa || '';
@@ -2601,9 +2542,9 @@ document.addEventListener('DOMContentLoaded', function(){
                 return;
             }
             const key = `${yearTop.value}-${monthTop.value}`;
-            const targets = JSON.parse(localStorage.getItem('padiSawahTargets') || '{}');
+            const targets = JSON.parse(localStorage.getItem('semumu_padiSawahTargets') || '{}');
             targets[key] = { targetPanen: tPanen, targetTanam: tTanam, kecamatan, desa };
-            localStorage.setItem('padiSawahTargets', JSON.stringify(targets));
+            localStorage.setItem('semumu_padiSawahTargets', JSON.stringify(targets));
             alert('Target bulan disimpan.');
             // mirror to filter selects and inputs
             const monthFilter = document.getElementById('filterMonthSelect');
@@ -2621,10 +2562,10 @@ document.addEventListener('DOMContentLoaded', function(){
                 return;
             }
             const key = `${yearTop.value}-${monthTop.value}`;
-            const targets = JSON.parse(localStorage.getItem('padiSawahTargets') || '{}');
+            const targets = JSON.parse(localStorage.getItem('semumu_padiSawahTargets') || '{}');
             if (targets[key]) {
                 delete targets[key];
-                localStorage.setItem('padiSawahTargets', JSON.stringify(targets));
+                localStorage.setItem('semumu_padiSawahTargets', JSON.stringify(targets));
             }
             document.getElementById('monthlyTargetPanenTop').value = '';
             document.getElementById('monthlyTargetTanamTop').value = '';
@@ -2907,9 +2848,9 @@ document.addEventListener('DOMContentLoaded', function(){
                 return;
             }
             const key = `${year.value}-${month.value}`;
-            const targets = JSON.parse(localStorage.getItem('padiSawahTargets') || '{}');
+            const targets = JSON.parse(localStorage.getItem('semumu_padiSawahTargets') || '{}');
             targets[key] = { targetPanen: tPanen, targetTanam: tTanam };
-            localStorage.setItem('padiSawahTargets', JSON.stringify(targets));
+            localStorage.setItem('semumu_padiSawahTargets', JSON.stringify(targets));
             alert('Target bulan disimpan.');
             renderTable();
         }
@@ -2922,10 +2863,10 @@ document.addEventListener('DOMContentLoaded', function(){
                 return;
             }
             const key = `${year.value}-${month.value}`;
-            const targets = JSON.parse(localStorage.getItem('padiSawahTargets') || '{}');
+            const targets = JSON.parse(localStorage.getItem('semumu_padiSawahTargets') || '{}');
             if (targets[key]) {
                 delete targets[key];
-                localStorage.setItem('padiSawahTargets', JSON.stringify(targets));
+                localStorage.setItem('semumu_padiSawahTargets', JSON.stringify(targets));
             }
             const fp = document.getElementById('filterTargetPanen');
             const ft = document.getElementById('filterTargetTanam');
@@ -2941,7 +2882,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
         function loadMonthlyTarget(year, month) {
             const key = `${year}-${String(month).padStart(2,'0')}`;
-            const targets = JSON.parse(localStorage.getItem('padiSawahTargets') || '{}');
+            const targets = JSON.parse(localStorage.getItem('semumu_padiSawahTargets') || '{}');
             return targets[key] || { targetPanen: 0, targetTanam: 0 };
         }
 
@@ -3089,6 +3030,26 @@ document.addEventListener('DOMContentLoaded', function(){
                     if (kecamatanInput) kecamatanInput.addEventListener('input', updatePrintInfo);
                     if (desaInput) desaInput.addEventListener('input', updatePrintInfo);
         }
+    // --- INTEGRASI GOOGLE SHEETS DENGAN APPS SCRIPT WEB APPS ---
+    // Ganti dengan URL Web Apps Anda
+    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcE8qAM3OjnV5Ql8IhdDov9OwJl3CoCOcis4Ixav2-51KXqL8AbgCFJmsr4IlKEXtp/exec';
+
+    // Fungsi untuk mengirim data baris ke Google Sheets via Apps Script Web Apps
+    function sendRowToGoogleSheets(rowData) {
+        // rowData: array data sesuai urutan kolom
+        fetch(GOOGLE_APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(rowData),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.text())
+        .then(txt => {
+            if (txt === 'OK') showToast('Data berhasil dikirim ke Google Sheet (Apps Script).', 'success');
+            else showToast('Gagal kirim data ke Apps Script: ' + txt, 'error');
+        })
+        .catch(err => showToast('Error Apps Script: ' + err, 'error'));
+    }
+    // --- END INTEGRASI GOOGLE SHEETS DENGAN APPS SCRIPT ---
     </script>
     <!-- Gabungan seluruh JS aplikasi (main.js + script di index.html) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -3653,10 +3614,34 @@ document.addEventListener('DOMContentLoaded', function(){
         updateDateTime();
     </script>
 <script>
-// Koneksi ke Google Sheet dinonaktifkan
+const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzzAYNfCIVHesJIEwfj8amkEKP1OrUoqWdf5-uPcmNfTIBgWLVksYByFPne63x8woLb/exec'; // Ganti dengan URL Web Apps Anda
+
 function sendRowToGoogleSheets(row) {
-    // Tidak melakukan apa-apa
-    console.info('Koneksi ke Google Sheet dinonaktifkan.');
+    const cells = row.querySelectorAll('td');
+    let data = {
+        tanggal: cells[0]?.innerText || '',
+        panen_real: cells[1]?.innerText || '',
+        panen_prediksi: cells[2]?.innerText || '',
+        bera_real: cells[3]?.innerText || '',
+        bera_prediksi: cells[4]?.innerText || '',
+        olah_real: cells[5]?.innerText || '',
+        olah_prediksi: cells[6]?.innerText || '',
+        tanam_real: cells[7]?.innerText || '',
+        tanam_prediksi: cells[8]?.innerText || '',
+        keterangan: cells[9]?.innerText || ''
+    };
+    fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(response => {
+        console.log('Data berhasil dikirim:', response);
+    })
+    .catch(err => {
+        console.error('Gagal mengirim data:', err);
+    });
 }
 </script>
 </body>
